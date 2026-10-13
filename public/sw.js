@@ -1,5 +1,5 @@
 const CACHE_NAME = "edubridge-shell-v1";
-const APP_SHELL = ["/", "/login", "/manifest.json"];
+const APP_SHELL = ["/", "/login", "/manifest.json", "/practice/offline"];
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
@@ -11,7 +11,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname.startsWith("/api/") || url.pathname.startsWith("/student") || url.pathname.startsWith("/admin") || url.pathname.startsWith("/teacher") || url.pathname.startsWith("/exams/")) return;
   event.respondWith(fetch(request).then((response) => {
-    if (response.ok && (url.pathname === "/" || url.pathname === "/login" || url.pathname === "/manifest.json" || url.pathname.startsWith("/_next/static/"))) {
+    if (response.ok && (url.pathname === "/" || url.pathname === "/login" || url.pathname === "/manifest.json" || url.pathname === "/practice/offline" || url.pathname.startsWith("/_next/static/"))) {
       const copy = response.clone();
       caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
     }
