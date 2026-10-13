@@ -10,7 +10,7 @@ export default async function TeacherDashboard() {
   if (!user) redirect("/login");
   if (user.role !== "TEACHER" && user.role !== "ADMIN") redirect("/student");
   const [subjects, questionCount, examCount] = await Promise.all([
-    prisma.subject.findMany({ select: { id: true, name: true } , orderBy: { name: "asc" } }),
+    prisma.subject.findMany({ select: { id: true, name: true, slug: true } , orderBy: { name: "asc" } }),
     prisma.question.count({ where: { authorId: user.id } }),
     prisma.exam.count({ where: { authorId: user.id } }),
   ]);
