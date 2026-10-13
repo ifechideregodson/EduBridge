@@ -36,8 +36,9 @@ The seed command creates the standard subject list. To create or refresh the ini
 3. Set `AUTH_SECRET` to a long random secret (32+ characters).
 4. Optionally set `OPENAI_API_KEY` and `OPENAI_MODEL` to enable the tutor. The API key must remain server-side.
 5. Deploy. Apply the schema to the production database from a trusted terminal/CI environment with `npx prisma db push`; do not run schema changes from an unauthenticated public endpoint.
-6. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in a secure environment and run `npm run db:seed` once to create the first admin, then remove those bootstrap values from runtime configuration if no longer needed.
-7. Sign in at `/login`. Student accounts can self-register; teacher/admin roles must be assigned by an administrator.
+6. To initialize the production database from GitHub on a phone, open **Repository → Settings → Secrets and variables → Actions** and add repository secrets named `DATABASE_URL`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. Use the database connection string and an admin password of at least 12 characters. Then open **Actions → EduBridge Database Setup → Run workflow**. This manually applies the schema and seeds subjects, original starter practice questions, one starter Mathematics CBT exam, and the first administrator. The seed questions are original starter examples, not official JAMB past questions.
+7. Set the same `DATABASE_URL` and a strong `AUTH_SECRET` in Vercel Project Settings → Environment Variables, plus `OPENAI_API_KEY` if you want AI tutoring. Redeploy after setting them. Remove `ADMIN_EMAIL` and `ADMIN_PASSWORD` from GitHub secrets after setup if you no longer need the bootstrap workflow.
+8. Sign in at `/login`. Student accounts can self-register; teacher/admin roles must be assigned by an administrator.
 
 ## Main routes
 
