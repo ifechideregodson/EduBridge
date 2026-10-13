@@ -1,0 +1,29 @@
+name: EduBridge CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/edubridge?schema=public
+      AUTH_SECRET: ci-only-secret-for-build-validation-at-least-32-characters
+      NEXT_PUBLIC_APP_URL: https://example.invalid
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Type check
+        run: npm run lint
+      - name: Build Next.js application
+        run: npm run build
