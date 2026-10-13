@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "postinstall": "prisma generate",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -28,6 +32,7 @@
     "@types/react-dom": "^19.1.9",
     "prisma": "^6.19.0",
     "tailwindcss": "^4.1.13",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2"
   }
 }
