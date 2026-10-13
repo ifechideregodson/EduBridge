@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import QuestionForm from "./question-form";
+import ExamForm from "./exam-form";
 
 export default async function TeacherDashboard() {
   const user = await getCurrentUser();
@@ -18,6 +19,7 @@ export default async function TeacherDashboard() {
     <h1 style={{fontSize:30}}>Question and exam management</h1><p style={{color:"#68786f"}}>Create syllabus-aligned questions, then assemble them into published CBT exams.</p>
     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:14,margin:"22px 0"}}>{[{label:"Questions authored",value:questionCount},{label:"Exams authored",value:examCount},{label:"Subjects",value:subjects.length}].map(x=><article key={x.label} style={card}><p style={{color:"#68786f",marginTop:0}}>{x.label}</p><strong style={{fontSize:28}}>{x.value}</strong></article>)}</div>
     <QuestionForm subjects={subjects}/>
+    <div style={{ marginTop: 18 }}><ExamForm subjects={subjects}/></div>
     <section style={{...card,marginTop:18}}><h2>Next: assemble an exam</h2><p style={{color:"#68786f"}}>Questions created here are stored in PostgreSQL. Exam publishing uses the API at <code>/api/exams</code> and requires question IDs, a subject, duration and title.</p><Link href="/student" className="btn">View learner experience</Link></section>
   </main>;
 }
