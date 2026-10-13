@@ -1,0 +1,32 @@
+name: EduBridge Database Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  initialize:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify required secrets
+        shell: bash
+        run: |
+          test -n "$DATABASE_URL" || (echo "Missing DATABASE_URL repository secret" && exit 1)
+          test -n "$ADMIN_EMAIL" || (echo "Missing ADMIN_EMAIL repository secret" && exit 1)
+          test -n "$ADMIN_PASSWORD" || (echo "Missing ADMIN_PASSWORD repository secret" && exit 1)
+          test "${#ADMIN_PASSWORD}" -ge 12 || (echo "ADMIN_PASSWORD must be at least 12 characters" && exit 1)
+      - name: Install dependencies
+        run: npm install
+      - name: Apply database schema
+        run: npx prisma db push
+      - name: Seed subjects, starter questions, and administrator
+        run: npm run db:seed
