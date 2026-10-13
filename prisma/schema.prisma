@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String
+  email         String          @unique
+  passwordHash  String
+  role          UserRole        @default(STUDENT)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  attempts      Attempt[]
+  progress      StudyProgress[]
+  tutorMessages TutorMessage[]
+  createdQuestions Question[]   @relation("QuestionAuthor")
+  createdExams  Exam[]          @relation("ExamAuthor")
+}
+
+model Subject {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  examType  String     @default("JAMB")
+  createdAt DateTime   @default(now())
+  questions Question[]
+  exams     Exam[]
+  progress  StudyProgress[]
+}
+
+model Question {
+  id          String         @id @default(cuid())
+  subjectId   String
+  subject     Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  prompt      String
+  options     String[]
+  correctIndex Int
+  explanation String
+  difficulty  String         @default("MEDIUM")
+  examType    String         @default("JAMB")
+  active      Boolean        @default(true)
+  authorId    String?
+  author      User?          @relation("QuestionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  examItems   ExamQuestion[]
+  answers     AttemptAnswer[]
+  @@index([subjectId, examType, active])
+}
+
+model Exam {
+  id          String         @id @default(cuid())
+  title       String
+  description String         @default("")
+  subjectId   String
+  subject     Subject        @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  examType    String         @default("JAMB")
+  durationMin Int            @default(30)
+  status      ExamStatus     @default(DRAFT)
+  authorId    String?
+  author      User?          @relation("ExamAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  questions   ExamQuestion[]
+  attempts    Attempt[]
+  @@index([status, examType])
+}
+
+model ExamQuestion {
+  examId     String
+  questionId String
+  position   Int
+  exam       Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@id([examId, questionId])
+  @@unique([examId, position])
+}
+
+model Attempt {
+  id          String        @id @default(cuid())
+  userId      String
+  examId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam        Exam          @relation(fields: [examId], references: [id], onDelete: Restrict)
+  status      AttemptStatus @default(IN_PROGRESS)
+  startedAt   DateTime      @default(now())
+  expiresAt   DateTime
+  submittedAt DateTime?
+  score       Int?
+  total       Int?
+  answers     AttemptAnswer[]
+  @@index([userId, startedAt])
+  @@index([examId, status])
+}
+
+model AttemptAnswer {
+  id            String   @id @default(cuid())
+  attemptId     String
+  questionId    String
+  selectedIndex Int?
+  isCorrect     Boolean?
+  answeredAt    DateTime @updatedAt
+  attempt       Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question      Question @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  @@unique([attemptId, questionId])
+}
+
+model StudyProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  subjectId       String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject         Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  questionsSeen   Int      @default(0)
+  questionsCorrect Int     @default(0)
+  studySeconds    Int      @default(0)
+  updatedAt       DateTime @updatedAt
+  @@unique([userId, subjectId])
+}
+
+model TutorMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+}
