@@ -2,6 +2,15 @@ name: EduBridge Database Setup
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/setup-database.yml'
+      - 'prisma/**'
+      - 'prisma.config.*'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   initialize:
